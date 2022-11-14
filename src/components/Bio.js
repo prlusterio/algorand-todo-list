@@ -6,15 +6,17 @@ export default function Bio() {
 			<h3>
 				How To use?
 			</h3>
+			<div className="how-to">
 					<p>
-						- Connect your wallet
+						1. Connect your wallet
 					</p>
 					<p>
-						- Register
+						2. Register
 					</p>
 					<p>
-						- Add a task
+						3. Add a task
 					</p>
+			</div>
 		</div>
 	);
 }

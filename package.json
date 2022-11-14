@@ -1,0 +1,51 @@
+{
+	"name": "wave-portal-frontend",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"prepare": "husky install",
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject"
+	},
+	"lint-staged": {
+		"*.{json,js,jsx}": "prettier --write"
+	},
+	"dependencies": {
+		"@perawallet/connect": "^0.1.6",
+		"@testing-library/jest-dom": "^4.2.4",
+		"@testing-library/react": "^9.3.2",
+		"@testing-library/user-event": "^7.1.2",
+		"algosdk": "^1.23.2",
+		"classnames": "^2.3.1",
+		"dayjs": "^1.10.7",
+		"ethers": "^5.4.4",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"react-scripts": "3.2.0"
+	},
+	"devDependencies": {
+		"husky": "^7.0.2",
+		"lint-staged": "^11.1.2",
+		"prettier": "^2.4.0"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browser": {
+		"crypto": false
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
+}

@@ -114,30 +114,7 @@ export default function useWallet(peraWallet) {
 		}
 	}
 
-	const optIn = async () => {
-		try {
-		  const index = CONSTANTS.APP_ID
-		  const sender = walletAccount[0]
-		  console.log(sender, index)
-		  const suggestedParams = await client.getTransactionParams().do();
-		  const optInTxn = algosdk.makeApplicationOptInTxn(
-			sender,
-			suggestedParams,
-			index
-		  );
-		  const actionTxGroup = [{ txn: optInTxn, signers: [sender] }];
-	
-		  const signedTx = await peraWallet.signTransaction([actionTxGroup]);
-		  console.log(signedTx);
-		  const { txId } = await client.sendRawTransaction(signedTx).do();
-		  const result = await waitForConfirmation(client, txId, 4);
-		  console.log(`Success`);
-		  setOptedIn(true)
-		} catch (e) {
-		  setOptedIn(false)
-		  console.error(`There was an error calling the app: ${e}`);
-		}
-	}
+	console.log(peraWallet)
 
 	const connectWallet = () => {
 		// await AlgoSigner.connect()
@@ -198,6 +175,30 @@ export default function useWallet(peraWallet) {
 		})
 	}
 
+	const optIn = async () => {
+		try {
+		  const index = CONSTANTS.APP_ID
+		  const sender = walletAccount[0]
+		  const suggestedParams = await client.getTransactionParams().do();
+		  const optInTxn = algosdk.makeApplicationOptInTxn(
+			sender,
+			suggestedParams,
+			index
+		  );
+		  const actionTxGroup = [{ txn: optInTxn, signers: [sender] }];
+		  console.log(actionTxGroup, peraWallet)
+		  const signedTx = await peraWallet.signTransaction([actionTxGroup]);
+		  console.log(signedTx);
+		  const { txId } = await client.sendRawTransaction(signedTx).do();
+		  const result = await waitForConfirmation(client, txId, 4);
+		  console.log(`Success`);
+		  setOptedIn(true)
+		} catch (e) {
+		  setOptedIn(false)
+		  console.error(`There was an error calling the app: ${e}`);
+		}
+	}
+
 	const noop = async (index, action, todo)  => {
 		try{
 		  const accounts = await peraWallet.reconnectSession()
@@ -211,7 +212,6 @@ export default function useWallet(peraWallet) {
 			new Uint8Array(Buffer.from(todo)),
 		  )
 		  const suggestedParams = await client.getTransactionParams().do();
-	  
 		  // create unsigned transaction
 		  let actionTx = algosdk.makeApplicationNoOpTxn(sender, suggestedParams, index, appArgs)
 		  // Sign the transaction

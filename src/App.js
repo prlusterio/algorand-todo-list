@@ -9,10 +9,8 @@ import useWallet from "./hooks/useWallet";
 
 import "./App.css";
 import WaveList from "./components/WaveList";
-import { PeraWalletConnect } from "@perawallet/connect";
 
-export default function App() {
-	const peraWallet = new PeraWalletConnect();
+export default function App({peraWallet}) {
 	const {
 		walletInstalled,
 		walletConnected,

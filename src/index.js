@@ -3,10 +3,13 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
+import { PeraWalletConnect } from "@perawallet/connect";
+
+const peraWallet = new PeraWalletConnect();
 
 ReactDOM.render(
     <React.StrictMode>
-      <App />
+      <App peraWallet={peraWallet} />
     </React.StrictMode>,
    document.getElementById('root')
   );

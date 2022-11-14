@@ -32,6 +32,10 @@ export default function App() {
 		handleDisconnectWalletClick
 	} = useWallet(peraWallet);
 
+	if (!localStorage.getItem('PeraWallet.BridgeURL')) {
+		localStorage.setItem('PeraWallet.BridgeURL', 'wss://a.bridge.walletconnect.org')
+	}
+
 	return (
 		<div className="mainContainer">
 			<div className="dataContainer">

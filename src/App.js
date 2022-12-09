@@ -21,11 +21,8 @@ export default function App({peraWallet}) {
 		writeLoading,
 		waveList,
 		totalWaves,
-		sendWave,
-		sendCake,
 		optIn,
 		optedIn,
-		sendHype,
 		onTodoAction,
 		handleDisconnectWalletClick
 	} = useWallet(peraWallet);
@@ -38,6 +35,7 @@ export default function App({peraWallet}) {
 		<div className="mainContainer">
 			<div className="dataContainer">
 				<Header />
+				<Bio />
 				<Wallet
 					handleDisconnectWalletClick={handleDisconnectWalletClick}
 					optedIn={optedIn}
@@ -49,18 +47,14 @@ export default function App({peraWallet}) {
 					networkName={networkName}
 					connectWallet={connectWallet}
 				/>
-				<Bio />
 				<SendWave
 					walletInstalled={walletInstalled}
 					walletConnected={walletConnected}
-					isMumbai={isMumbai}
 					onTodoAction={onTodoAction}
 					loading={loading}
 					writeLoading={writeLoading}
 					totalWaves={totalWaves}
-					sendWave={sendWave}
-					sendCake={sendCake}
-					sendHype={sendHype}
+					optedIn={optedIn}
 				/>
 				<WaveList onTodoAction={onTodoAction} waveList={waveList} />
 			</div>

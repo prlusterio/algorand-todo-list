@@ -10,14 +10,14 @@ const WriteLoadingMessage = {
 };
 
 export default function WaveStatus({ loading, writeLoading, totalWaves }) {
-	if (loading || !totalWaves) {
+	if (loading) {
 		return null;
 	}
 
 	if (writeLoading) {
 		return (
 			<div className="waveStatus">
-				<p>{WriteLoadingMessage[writeLoading]}</p>
+				<p >{WriteLoadingMessage[writeLoading]}</p>
 				<Spinner />
 			</div>
 		);
@@ -25,7 +25,7 @@ export default function WaveStatus({ loading, writeLoading, totalWaves }) {
 
 	return (
 		<div className="waveStatus fading">
-			{/* I've been waved {totalWaves === 1 ? `once` : `${totalWaves} times`} */}
+			{totalWaves ? totalWaves : 0}/16 Tasks
 		</div>
 	);
 }

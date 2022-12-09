@@ -9,18 +9,16 @@ import { WriteStatus } from "../hooks/useWallet";
 export default function SendWave({
 	walletInstalled,
 	walletConnected,
-	isMumbai,
 	loading,
 	writeLoading,
 	totalWaves,
-	sendWave,
-	sendCake,
-	sendHype,
-	onTodoAction
+	onTodoAction,
+	optedIn
 }) {
 	const [message, setMessage] = useState("");
-	const disableInput = Boolean(writeLoading);
+	const disableInput = Boolean(writeLoading) || !optedIn;
 	const disableButtons =
+		!optedIn ||
 		!walletInstalled ||
 		!walletConnected ||
 		loading ||
@@ -54,18 +52,6 @@ export default function SendWave({
 					</span>
 					Create a task
 				</button>
-				{/* <button className="button buttonCake" onClick={() => sendCake(message)}>
-					<span className="buttonEmoji" role="img" aria-label="Cake">
-						🍰
-					</span>
-					Send me cake
-				</button>
-				<button className="button buttonFire" onClick={() => sendHype(message)}>
-					<span className="buttonEmoji" role="img" aria-label="Fire">
-						🔥
-					</span>
-					Share some hype
-				</button> */}
 			</section>
 			<WaveStatus
 				loading={loading}

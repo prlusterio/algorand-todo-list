@@ -1,12 +1,9 @@
 import React from "react";
-import classNames from "classnames";
 
 export default function Wallet({
 	loading,
 	walletInstalled,
 	walletConnected,
-	networkName,
-	isMumbai,
 	optedIn,
 	optIn,
 	connectWallet,
@@ -39,19 +36,6 @@ export default function Wallet({
 						<span className="dotConnected" />
 						Wallet Connected
 					</div>
-					{/* <div
-						className={classNames(
-							"network",
-							isMumbai ? "networkValid" : "networkInvalid",
-						)}
-					>
-						Network: <span className="networkName">{networkName}</span>
-					</div>
-					{!isMumbai && (
-						<div className="network networkInvalid">
-							Please switch to Polygon Mumbai
-						</div>
-					)} */}
 				</div>
 			)}
 			{walletConnected && (

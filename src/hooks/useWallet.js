@@ -28,10 +28,6 @@ const EvmName = {
 	80001: "Polygon Mumbai",
 };
 
-const EvmChain = {
-	Mumbai: 80001,
-};
-
 export default function useWallet(peraWallet) {
 	const [loading, setLoading] = useState(true);
 	const [writeLoading, setWriteLoading] = useState(WriteStatus.None);
@@ -49,7 +45,6 @@ export default function useWallet(peraWallet) {
 		}
 		return EvmName[walletNetwork?.chainId] || walletNetwork.name;
 	}, [walletNetwork]);
-	const isMumbai = walletNetwork?.chainId === EvmChain.Mumbai;
 
 	const isWindowFocused = useWindowFocus();
 
@@ -60,13 +55,6 @@ export default function useWallet(peraWallet) {
 		};
 		runUpdates();
 	}, [setTotalWaves, setWaveList]);
-
-	// const addNewWaveToList = useCallback(
-	// 	(newWave) => {
-	// 		setWaveList([newWave, ...waveList]);
-	// 	},
-	// 	[waveList],
-	// );
 
 	useEffect(() => {
 		subscribeToWaveEvents((newWave) => {
@@ -81,9 +69,7 @@ export default function useWallet(peraWallet) {
 			// check status whenever the window focus status changes
 		}
 		const runUpdates = async () => {
-			// setInstalled(getWalletInstalled());
 			setConnected(await getWalletConnected());
-			// updateWaves();
 			setLoading(false);
 		};
 		runUpdates();
@@ -91,34 +77,31 @@ export default function useWallet(peraWallet) {
 
 	const checkOptedIn = async (sender, index) => {
 		try {
-		  let appInfo = await client.accountApplicationInformation(sender, index).do();
-		  if (appInfo['app-local-state']) {
-			if (appInfo['app-local-state']['key-value']) {
-				const todoList = appInfo['app-local-state']['key-value']
-				if (todoList.length > 0) {
-					const finalTodo = todoList.map(_ => ({key: atob(_.key), value: _.value.uint}))
-					setWaveList(finalTodo)
+			let appInfo = await client.accountApplicationInformation(sender, index).do();
+			if (appInfo['app-local-state']) {
+				if (appInfo['app-local-state']['key-value']) {
+					const todoList = appInfo['app-local-state']['key-value']
+					if (todoList.length > 0) {
+						const finalTodo = todoList.map(_ => ({ key: atob(_.key), value: _.value.uint }))
+						setWaveList(finalTodo)
+						setTotalWaves(finalTodo.length)
+					} else {
+						setWaveList([])
+					}
 				} else {
 					setWaveList([])
 				}
-			} else {
-				setWaveList([])
+
+				setOptedIn(true)
 			}
-			
-			setOptedIn(true)
-		  }
 		} catch (e) {
 			console.log(e)
-		  setOptedIn(false)
-		  // console.error(`There was an error calling the app: ${e}`);
+			setOptedIn(false)
+			// console.error(`There was an error calling the app: ${e}`);
 		}
 	}
 
-	console.log(peraWallet)
-
 	const connectWallet = () => {
-		// await AlgoSigner.connect()
-		//     getUserAccount()
 		return peraWallet.connect().then((newAccounts) => {
 			// setup the disconnect event listener
 			/* eslint-disable */
@@ -134,39 +117,11 @@ export default function useWallet(peraWallet) {
 		return await noop(appIndex, action, message, walletAccount[0])
 	}
 
-
-	const waveReaction = async (reaction, message) => {
-		if (!walletInstalled) {
-			return;
-		}
-
-		if (!walletConnected) {
-			setWriteLoading(WriteStatus.Connect);
-			await connectWallet();
-			setConnected(await getWalletConnected());
-		}
-		setWriteLoading(WriteStatus.Request);
-
-		writeWave(reaction, message)
-			.then(async (transaction) => {
-				setWriteLoading(WriteStatus.Pending);
-
-				await transaction.wait();
-				updateWaves();
-				setWriteLoading(WriteStatus.None);
-			})
-			.catch((error) => {
-				window.alert("Failed to write transaction!");
-				console.error(error);
-				setWriteLoading(WriteStatus.None);
-			});
-	};
-
 	async function getWalletConnected() {
 		return peraWallet.reconnectSession().then((accounts) => {
 			// Setup disconnect event listener
 			peraWallet.connector?.on('disconnect', handleDisconnectWalletClick);
-	
+
 			if (accounts.length) {
 				setAccount(accounts)
 				checkOptedIn(accounts[0], appIndex)
@@ -177,91 +132,76 @@ export default function useWallet(peraWallet) {
 
 	const optIn = async () => {
 		try {
-		  const index = CONSTANTS.APP_ID
-		  const sender = walletAccount[0]
-		  const suggestedParams = await client.getTransactionParams().do();
-		  const optInTxn = algosdk.makeApplicationOptInTxn(
-			sender,
-			suggestedParams,
-			index
-		  );
-		  const actionTxGroup = [{ txn: optInTxn, signers: [sender] }];
-		  console.log(actionTxGroup, peraWallet)
-		  const signedTx = await peraWallet.signTransaction([actionTxGroup]);
-		  console.log(signedTx);
-		  const { txId } = await client.sendRawTransaction(signedTx).do();
-		  const result = await waitForConfirmation(client, txId, 4);
-		  console.log(`Success`);
-		  setOptedIn(true)
+			const index = CONSTANTS.APP_ID
+			const sender = walletAccount[0]
+			const suggestedParams = await client.getTransactionParams().do();
+			const optInTxn = algosdk.makeApplicationOptInTxn(
+				sender,
+				suggestedParams,
+				index
+			);
+			const actionTxGroup = [{ txn: optInTxn, signers: [sender] }];
+			console.log(actionTxGroup, peraWallet)
+			const signedTx = await peraWallet.signTransaction([actionTxGroup]);
+			console.log(signedTx);
+			const { txId } = await client.sendRawTransaction(signedTx).do();
+			const result = await waitForConfirmation(client, txId, 4);
+			console.log(`Success`);
+			setOptedIn(true)
 		} catch (e) {
-		  setOptedIn(false)
-		  console.error(`There was an error calling the app: ${e}`);
+			setOptedIn(false)
+			console.error(`There was an error calling the app: ${e}`);
 		}
 	}
 
-	const noop = async (index, action, todo)  => {
-		try{
-		  const accounts = await peraWallet.reconnectSession()
-		  const sender = accounts[0]
-		  // let choice = localStorage.getItem("candidate")
-		  // console.log("choice is " + choice)
-		  console.log(index, action, todo, sender)
-		  const appArgs = []
-		  appArgs.push(
-			new Uint8Array(Buffer.from(action)),
-			new Uint8Array(Buffer.from(todo)),
-		  )
-		  const suggestedParams = await client.getTransactionParams().do();
-		  // create unsigned transaction
-		  let actionTx = algosdk.makeApplicationNoOpTxn(sender, suggestedParams, index, appArgs)
-		  // Sign the transaction
-	  
-		  // Use the AlgoSigner encoding library to make the transactions base64
-		  // const txn_b64 = await AlgoSigner.encoding.msgpackToBase64(txn.toByte());
-	  
-		  // let signedTxs  = await AlgoSigner.signTxn([{txn: txn_b64}])
-		  // console.log(signedTxs)
-		  
-		  // // Get the base64 encoded signed transaction and convert it to binary
-		  // let binarySignedTx = await AlgoSigner.encoding.base64ToMsgpack(signedTxs[0].blob);
-	  
-		  // // Send the transaction through the SDK client
-		  // let txId = await client.sendRawTransaction(binarySignedTx).do();
-		  //   console.log(txId)
-	  
-		  // const confirmedTxn = await algosdk.waitForConfirmation(client, txId, 4);
-		  const actionTxGroup = [{ txn: actionTx, signers: [sender] }];
-	  
-		  console.log('before')
-		  const signedTx = await peraWallet.signTransaction([actionTxGroup]);
-		  console.log('after')
-		  console.log(signedTx);
-		  const { txId } = await client.sendRawTransaction(signedTx).do();
-		  const confirmedTxn = await waitForConfirmation(client, txId, 4);
-		  console.log("confirmed" + confirmedTxn)
-	  
-		  //Get the completed Transaction
-		  console.log("Transaction " + txId + " confirmed in round " + confirmedTxn["confirmed-round"]);
-	  
-		  // display results
-		  let transactionResponse = await client.pendingTransactionInformation(txId).do();
-		  console.log("Called app-id:",transactionResponse['txn']['txn']['apid'])
-		  if (transactionResponse['global-state-delta'] !== undefined ) {
-			  console.log("Global State updated:",transactionResponse['global-state-delta']);
-		  }
-		  if (transactionResponse['local-state-delta'] !== undefined ) {
-			  console.log("Local State updated:",transactionResponse['local-state-delta']);
-		  }
-		  checkOptedIn(sender, CONSTANTS.APP_ID)
-		  console.log('success')
-		}catch(err){
-		  console.log(err)
-		}
-	  }
+	const noop = async (index, action, todo) => {
+		try {
+			const accounts = await peraWallet.reconnectSession()
+			const sender = accounts[0]
+			setWriteLoading(WriteStatus.Request)
 
-	const sendWave = (message) => waveReaction(Reaction.Wave, message);
-	const sendCake = (message) => waveReaction(Reaction.Cake, message);
-	const sendHype = (message) => waveReaction(Reaction.Hype, message);
+			// console.log(index, action, todo, sender)
+			const appArgs = []
+			appArgs.push(
+				new Uint8Array(Buffer.from(action)),
+				new Uint8Array(Buffer.from(todo)),
+			)
+			const suggestedParams = await client.getTransactionParams().do();
+			// create unsigned transaction
+			// trigger smart contract
+			let actionTx = algosdk.makeApplicationNoOpTxn(sender, suggestedParams, index, appArgs)
+
+			// const confirmedTxn = await algosdk.waitForConfirmation(client, txId, 4);
+			const actionTxGroup = [{ txn: actionTx, signers: [sender] }];
+
+			//   console.log('before')
+			const signedTx = await peraWallet.signTransaction([actionTxGroup]);
+			//   console.log('after')
+			//   console.log(signedTx);
+			setWriteLoading(WriteStatus.Pending)
+			const { txId } = await client.sendRawTransaction(signedTx).do();
+			const confirmedTxn = await waitForConfirmation(client, txId, 4);
+			setWriteLoading(WriteStatus.None)
+
+			//Get the completed Transaction
+			console.log("Transaction " + txId + " confirmed in round " + confirmedTxn["confirmed-round"]);
+
+			// display results
+			let transactionResponse = await client.pendingTransactionInformation(txId).do();
+			console.log("Called app-id:", transactionResponse['txn']['txn']['apid'])
+			if (transactionResponse['global-state-delta'] !== undefined) {
+				console.log("Global State updated:", transactionResponse['global-state-delta']);
+			}
+			if (transactionResponse['local-state-delta'] !== undefined) {
+				console.log("Local State updated:", transactionResponse['local-state-delta']);
+			}
+			checkOptedIn(sender, CONSTANTS.APP_ID)
+			console.log('success')
+		} catch (err) {
+			console.log(err)
+			setWriteLoading(WriteStatus.None)
+		}
+	}
 
 	function handleDisconnectWalletClick() {
 		localStorage.removeItem('walletconnect')
@@ -279,31 +219,14 @@ export default function useWallet(peraWallet) {
 		walletError,
 		connectWallet,
 		networkName,
-		isMumbai,
 		waveList,
 		totalWaves,
 		optedIn,
-		sendWave,
 		peraWallet,
-		sendCake,
-		sendHype,
 		optIn,
 		onTodoAction,
 		handleDisconnectWalletClick
 	};
-}
-
-function getWalletInstalled() {
-	return typeof window.ethereum !== "undefined";
-}
-
-function getNetwork() {
-	if (!window.ethereum) {
-		return false;
-	}
-
-	const provider = new ethers.providers.Web3Provider(window.ethereum);
-	return provider.getNetwork();
 }
 
 async function getTotalWaves() {
@@ -321,20 +244,6 @@ async function getTotalWaves() {
 	const totalWaves = await wavePortalContract.getTotalWaves();
 	console.log({ totalWaves });
 	return Number.parseInt(totalWaves.toString(), 10);
-}
-
-function writeWave(reaction, message) {
-	const provider = new ethers.providers.Web3Provider(window.ethereum);
-	const signer = provider.getSigner();
-	const wavePortalContract = new ethers.Contract(
-		CONTRACT_ADDRESS,
-		wavePortalAbi.abi,
-		signer,
-	);
-
-	return wavePortalContract.wave(reaction, message, {
-		gasLimit: 300000,
-	});
 }
 
 async function getAllWaves() {

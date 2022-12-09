@@ -7,7 +7,7 @@ export default function useState() {
 	const [walletConnected, setConnected] = useState(false);
 	const [walletAccount, setAccount] = useState("");
 	const [walletError, setWalletError] = useState(null);
-	const [totalWaves, setTotalWaves] = useState(null);
+	const [totalWaves, setTotalWaves] = useState(0);
 
 	return {
 		loading,
